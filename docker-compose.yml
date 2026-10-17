@@ -1,0 +1,19 @@
+# 3-node JetStream cluster. no_advertise keeps clients on the URLs we give them
+# (the repro routes the consumer through local proxies).
+x-nats: &nats
+  image: nats:2.12.4
+  restart: unless-stopped
+
+services:
+  n1:
+    <<: *nats
+    command: -js -sd /data -n n1 --cluster_name c2063 --cluster nats://0.0.0.0:6222 --routes nats://n1:6222,nats://n2:6222,nats://n3:6222 --no_advertise
+    ports: ["14221:4222"]
+  n2:
+    <<: *nats
+    command: -js -sd /data -n n2 --cluster_name c2063 --cluster nats://0.0.0.0:6222 --routes nats://n1:6222,nats://n2:6222,nats://n3:6222 --no_advertise
+    ports: ["14222:4222"]
+  n3:
+    <<: *nats
+    command: -js -sd /data -n n3 --cluster_name c2063 --cluster nats://0.0.0.0:6222 --routes nats://n1:6222,nats://n2:6222,nats://n3:6222 --no_advertise
+    ports: ["14223:4222"]
